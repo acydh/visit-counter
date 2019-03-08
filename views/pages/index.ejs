@@ -4,11 +4,22 @@
   <h1><%= title %></h1>
 </div>
 
-<div class="container">
+<div class="container mt-5">
+  <h2>View website counter</h2>
+  <form method="post" action="/view">
+  <div class="form-group">
+    <label for="website-input">View key</label>
+    <input type="text" name="viewKey" class="form-control" id="view-key" aria-describedby="viewKey">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+</div>
+<div class="container mt-5">
+<h2>Or register a new website</h2>
   <form method="post" action="/register">
   <div class="form-group">
     <label for="website-input">Website</label>
-    <input type="text" name="website" class="form-control" id="website-input" aria-describedby="emailHelp">
+    <input type="text" name="website" class="form-control" id="website-input" aria-describedby="website">
   </div>
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>

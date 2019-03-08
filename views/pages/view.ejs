@@ -1,0 +1,15 @@
+<% include ../partials/header %>
+  <div class="container">
+    <h2>Website: <%= website %> <span class="key-span">(<%= key %>)</span></h2>
+    <h2>Visits: <%= visits %></h2>
+    <h2>Uniques: <%= uniques %></h2>
+    <h4>Log:</h4>
+    <ul>
+    <% ipCollection.forEach(function(ip) { %>
+        <li><%=ip.dateStamp.getDay()%>/<%=ip.dateStamp.getMonth()%>/<%=ip.dateStamp.getFullYear()%> <%=ip.dateStamp.getHours()%>:<%=ip.dateStamp.getMinutes()%>:<%=ip.dateStamp.getSeconds()%> - <%= ip.ip %></li>
+    <% }); %>
+    </ul>
+
+  </div>
+
+<% include ../partials/footer %>
