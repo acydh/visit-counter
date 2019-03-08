@@ -1,0 +1,18 @@
+<% include ../partials/header %>
+
+<div class="container">
+  <h1><%= title %></h1>
+</div>
+
+<div class="container">
+  <form method="post" action="/register">
+  <div class="form-group">
+    <label for="website-input">Website</label>
+    <input type="text" name="website" class="form-control" id="website-input" aria-describedby="emailHelp">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+</div>
+
+
+<% include ../partials/footer %>
