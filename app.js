@@ -35,6 +35,7 @@ const Counter = mongoose.model("Counter", counterSchema);
       var params = [
        { title: 'NoJS Visits Counter' },
       ];
+      console.log(req.protocol + '://' + req.get('host') + req.originalUrl);
       res.render("pages/index", {
         title: params[0].title
       });
@@ -75,7 +76,7 @@ const Counter = mongoose.model("Counter", counterSchema);
           if (foundWebsite) {
             res.send("Website already registered");
           } else {
-            createTheCounter(website, res);
+            createTheCounter(website, res, req);
           }
         },100);
       });
@@ -101,10 +102,12 @@ const Counter = mongoose.model("Counter", counterSchema);
     });
 
 
-      const createTheCounter = (website, res) => {
+      const createTheCounter = (website, res, req) => {
         console.log("Creating the website in the db")
         const randomStringPublic = randomstring.generate(10);
         const randomStringPrivate = randomstring.generate(10);
+        const fullUrl = req.protocol + '://' + req.get('host') + "/count/" + randomStringPublic;
+        console.log(fullUrl);
         const newCounter = new Counter({
               website: website,
               visits: 0,
@@ -119,7 +122,11 @@ const Counter = mongoose.model("Counter", counterSchema);
                 console.log(err);
               }
             })
-            res.send(website + " added to the db. Your countKey key is: " + randomStringPublic + ". Your view key is: " + randomStringPrivate);
+            res.render("pages/new-counter", {
+              viewKey: randomStringPrivate,
+              website: website,
+              fullUrl: fullUrl
+            })
           }
 
 
@@ -141,7 +148,7 @@ const Counter = mongoose.model("Counter", counterSchema);
                     overwrite: true
                   }, function(error) {
                     if (!error) {
-                      res.send(website + " updated : " + newVisits);
+                      res.send(website + " updated");
                     } else {
                       res.send(error);
                     }
