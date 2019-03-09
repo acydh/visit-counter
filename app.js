@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const randomstring = require("randomstring");
 const getIP = require('ipware')().get_ip;
-var Fingerprint = require('express-fingerprint');
+const Fingerprint = require('express-fingerprint');
 const mongoose = require("mongoose");
 const expressip = require('express-ip');
 
@@ -44,14 +44,11 @@ const counterSchema = mongoose.Schema({
 const Counter = mongoose.model("Counter", counterSchema);
 
     app.get("/", function(req, res) {
-      var ipInfo = JSON.stringify(req.ipInfo);
-      console.log(ipInfo);
       var params = [
-       { title: 'NoJS Visits Counter', ipInfo: ipInfo },
+       { title: 'NoJS Visits Counter' },
       ];
       res.render("pages/index", {
         title: params[0].title,
-        ipInfo: params[0].ipInfo
       });
     });
 
@@ -154,10 +151,10 @@ const Counter = mongoose.model("Counter", counterSchema);
                 const dataCollection = foundWebsite.dataCollection;
                 const dateStamp = new Date();
                 const fingerPrintHash = req.fingerprint.hash;
-                const fingerPrintCountry = req.fingerprint.components.geoip.country;
-                const fingerPrintRegion = req.fingerprint.components.geoip.resion;
-                const fingerPrintCity = req.fingerprint.components.geoip.city;
-                dataCollection.push({ip: getIP(req).clientIp, dateStamp: dateStamp, hash: fingerPrintHash, country: fingerPrintCountry, region: fingerPrintRegion, city: fingerPrintCity});
+                const ipInfoCountry = req.ipInfo.country || "NaN";
+                const ipInfoCity = req.ipInfo.city || "NaN";
+                console.log(ipInfoCountry + " " + ipInfoCity);
+                dataCollection.push({ip: getIP(req).clientIp, dateStamp: dateStamp, hash: fingerPrintHash, country: ipInfoCountry, city: ipInfoCity});
                 const newVisits = currentVisits + 1;
                   Counter.updateOne({
                     website: website
