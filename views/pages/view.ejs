@@ -6,7 +6,7 @@
     <h4>Log:</h4>
     <ul>
     <% dataCollection.forEach(function(ip) { %>
-        <li><%=('0'+ip.dateStamp.getDay()).slice(-2)%>/<%=('0'+ip.dateStamp.getMonth()).slice(-2)%>/<%=ip.dateStamp.getFullYear()%> <%=ip.dateStamp.getHours()%>.<%=('0'+ip.dateStamp.getMinutes()).slice(-2)%>.<%=('0'+ip.dateStamp.getSeconds()).slice(-2) %> - <%= ip.ip %> - <%= ip.hash %> - <%= ip.ipInfoCounty %> - <%= ip.ipInfoCity %></li>
+        <li><%=('0'+ip.dateStamp.getDay()).slice(-2)%>/<%=('0'+ip.dateStamp.getMonth()).slice(-2)%>/<%=ip.dateStamp.getFullYear()%> <%=ip.dateStamp.getHours()%>.<%=('0'+ip.dateStamp.getMinutes()).slice(-2)%>.<%=('0'+ip.dateStamp.getSeconds()).slice(-2) %> - <%= ip.ip %> - <%= ip.hash %> - <%= ip.county %> - <%= ip.city %></li>
     <% }); %>
     </ul>
 
