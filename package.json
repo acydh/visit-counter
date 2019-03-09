@@ -12,6 +12,7 @@
     "ejs": "^2.6.1",
     "express": "~4.16.0",
     "express-fingerprint": "^1.1.2",
+    "express-ip": "^1.0.3",
     "http-errors": "~1.6.2",
     "ipware": "^1.0.0",
     "mongoose": "^5.4.17",

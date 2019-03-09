@@ -7,8 +7,12 @@ const randomstring = require("randomstring");
 const getIP = require('ipware')().get_ip;
 var Fingerprint = require('express-fingerprint');
 const mongoose = require("mongoose");
+const expressip = require('express-ip');
 
 var app = express();
+
+
+app.use(expressip().getIpInfoMiddleware);
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({
   extended: false
@@ -34,17 +38,20 @@ const counterSchema = mongoose.Schema({
   visits: Number,
   viewKey: String,
   countKey: String,
-  ipCollection: Array
+  dataCollection: Array
 });
 
 const Counter = mongoose.model("Counter", counterSchema);
 
     app.get("/", function(req, res) {
+      var ipInfo = JSON.stringify(req.ipInfo);
+      console.log(ipInfo);
       var params = [
-       { title: 'NoJS Visits Counter' },
+       { title: 'NoJS Visits Counter', ipInfo: ipInfo },
       ];
       res.render("pages/index", {
-        title: params[0].title
+        title: params[0].title,
+        ipInfo: params[0].ipInfo
       });
     });
 
@@ -53,19 +60,18 @@ const Counter = mongoose.model("Counter", counterSchema);
       Counter.findOne({viewKey: key}, function(err, foundWebsite) {
         if (!err) {
           if(foundWebsite) {
-
             var website = foundWebsite.website;
             var visits = foundWebsite.visits;
-            var ipCollection = foundWebsite.ipCollection;
-            var uniques = countUniques(ipCollection);
+            var dataCollection = foundWebsite.dataCollection;
+            var uniques = countUniques(dataCollection);
             var params = [
-             { key: key, website: website, visits: visits, ipCollection: ipCollection },
+             { key: key, website: website, visits: visits, dataCollection: dataCollection },
             ];
             res.render("pages/view", {
               key: params[0].key,
               website: params[0].website,
               visits: params[0].visits,
-              ipCollection: params[0].ipCollection,
+              dataCollection: params[0].dataCollection,
               uniques: uniques,
               userData: params[0].userData
             });
@@ -122,7 +128,7 @@ const Counter = mongoose.model("Counter", counterSchema);
               visits: 0,
               countKey: randomStringPublic,
               viewKey: randomStringPrivate,
-              ipCollection: []
+              dataCollection: []
             });
             newCounter.save(function(err) {
               if (!err) {
@@ -145,18 +151,18 @@ const Counter = mongoose.model("Counter", counterSchema);
               if (!err) {
                 const website = foundWebsite.website;
                 const currentVisits = foundWebsite.visits;
-                const ipCollection = foundWebsite.ipCollection;
+                const dataCollection = foundWebsite.dataCollection;
                 const dateStamp = new Date();
                 const fingerPrintHash = req.fingerprint.hash;
                 const fingerPrintCountry = req.fingerprint.components.geoip.country;
                 const fingerPrintRegion = req.fingerprint.components.geoip.resion;
                 const fingerPrintCity = req.fingerprint.components.geoip.city;
-                ipCollection.push({ip: getIP(req).clientIp, dateStamp: dateStamp, hash: fingerPrintHash, country: fingerPrintCountry, region: fingerPrintRegion, city: fingerPrintCity});
+                dataCollection.push({ip: getIP(req).clientIp, dateStamp: dateStamp, hash: fingerPrintHash, country: fingerPrintCountry, region: fingerPrintRegion, city: fingerPrintCity});
                 const newVisits = currentVisits + 1;
                   Counter.updateOne({
                     website: website
                   }, {
-                    $set: {"visits" : newVisits, "ipCollection" : ipCollection}
+                    $set: {"visits" : newVisits, "dataCollection" : dataCollection}
                   }, {
                     overwrite: true
                   }, function(error) {
