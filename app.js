@@ -1,21 +1,29 @@
 require('dotenv').config();
-var createError = require('http-errors');
-var express = require('express');
+const createError = require('http-errors');
+const express = require('express');
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const randomstring = require("randomstring");
-var getIP = require('ipware')().get_ip;
+const getIP = require('ipware')().get_ip;
+var Fingerprint = require('express-fingerprint');
 const mongoose = require("mongoose");
 
 var app = express();
 app.use(express.static(__dirname + '/public'));
-
 app.use(bodyParser.urlencoded({
   extended: false
 }));
-
 app.use(express.static("public"));
 app.set('view engine', 'ejs');
+
+app.use(Fingerprint({
+    parameters:[
+        Fingerprint.useragent,
+        Fingerprint.acceptHeaders,
+        Fingerprint.geoip,
+      ]
+    })
+  )
 
 mongoose.connect(process.env.DB_HOST, {
   useNewUrlParser: true
@@ -35,7 +43,6 @@ const Counter = mongoose.model("Counter", counterSchema);
       var params = [
        { title: 'NoJS Visits Counter' },
       ];
-      console.log(req.protocol + '://' + req.get('host') + req.originalUrl);
       res.render("pages/index", {
         title: params[0].title
       });
@@ -46,6 +53,7 @@ const Counter = mongoose.model("Counter", counterSchema);
       Counter.findOne({viewKey: key}, function(err, foundWebsite) {
         if (!err) {
           if(foundWebsite) {
+
             var website = foundWebsite.website;
             var visits = foundWebsite.visits;
             var ipCollection = foundWebsite.ipCollection;
@@ -58,7 +66,8 @@ const Counter = mongoose.model("Counter", counterSchema);
               website: params[0].website,
               visits: params[0].visits,
               ipCollection: params[0].ipCollection,
-              uniques: uniques
+              uniques: uniques,
+              userData: params[0].userData
             });
           } else {
             res.send("key not in the db")
@@ -138,7 +147,11 @@ const Counter = mongoose.model("Counter", counterSchema);
                 const currentVisits = foundWebsite.visits;
                 const ipCollection = foundWebsite.ipCollection;
                 const dateStamp = new Date();
-                ipCollection.push({ip: getIP(req).clientIp, dateStamp: dateStamp});
+                const fingerPrintHash = req.fingerprint.hash;
+                const fingerPrintCountry = req.fingerprint.components.geoip.country;
+                const fingerPrintRegion = req.fingerprint.components.geoip.resion;
+                const fingerPrintCity = req.fingerprint.components.geoip.city;
+                ipCollection.push({ip: getIP(req).clientIp, dateStamp: dateStamp, hash: fingerPrintHash, country: fingerPrintCountry, region: fingerPrintRegion, city: fingerPrintCity});
                 const newVisits = currentVisits + 1;
                   Counter.updateOne({
                     website: website
