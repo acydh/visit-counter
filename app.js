@@ -134,11 +134,9 @@ app.post("/register", function(req, res) {
 ////////////////////
 
 const createTheCounter = (website, res, req) => {
-  console.log("Creating the website in the db")
   const randomStringPublic = randomstring.generate(10);
   const randomStringPrivate = randomstring.generate(10);
   const fullUrl = req.protocol + '://' + req.get('host') + "/count/" + randomStringPublic;
-  console.log(fullUrl);
   const newCounter = new Counter({
     website: website,
     visits: 0,
@@ -147,12 +145,10 @@ const createTheCounter = (website, res, req) => {
     dataCollection: []
   });
   newCounter.save(function(err) {
-    if (!err) {
-      console.log(website + " added to the db")
-    } else {
+    if (err) {
       console.log(err);
     }
-  })
+  });
   res.render("pages/new-counter", {
     viewKey: randomStringPrivate,
     website: website,
@@ -162,7 +158,6 @@ const createTheCounter = (website, res, req) => {
 
 
 const updateTheCounter = (website, res, req) => {
-  console.log("updating the " + website + " counter");
   Counter.findOne({
     website: website
   }, function(err, foundWebsite) {
@@ -174,7 +169,6 @@ const updateTheCounter = (website, res, req) => {
       const fingerPrintHash = req.fingerprint.hash;
       const ipInfoCountry = req.ipInfo.country || "NaN";
       const ipInfoCity = req.ipInfo.city || "NaN";
-      console.log(ipInfoCountry + " " + ipInfoCity);
       dataCollection.push({
         ip: getIP(req).clientIp,
         dateStamp: dateStamp,
@@ -215,6 +209,20 @@ const countUniques = (a) => {
   return counts.length;
 }
 
+const resetViews = (viewKey) => {
+  const query = {
+    viewKey: viewKey
+    }
+  Counter.findOneAndUpdate(query,
+  { $set: {dataCollection: [], visits: 0 }}, function(err, data) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(data);
+    }
+  });
+};
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -233,7 +241,7 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(3000, function() {
-  console.log("Server started");
+
 });
 
 module.exports = app;
