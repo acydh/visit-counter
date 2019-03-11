@@ -60,6 +60,21 @@ app.get("/", function(req, res) {
   });
 });
 
+app.post("/register", function(req, res) {
+  const website = req.body.website;
+  Counter.findOne({
+    website: website
+  }, function(err, foundWebsite) {
+    setTimeout(function() {
+      if (foundWebsite) {
+        res.send(website + " already registered");
+      } else {
+        createTheCounter(website, res, req);
+      }
+    }, 100);
+  });
+});
+
 app.get("/count/:key", function(req, res) {
   const key = req.params.key;
   Counter.findOne({
@@ -82,50 +97,20 @@ app.get("/count/:key", function(req, res) {
 
 app.post("/view", function(req, res) {
   const key = req.body.viewKey;
-  Counter.findOne({
-    viewKey: key
-  }, function(err, foundWebsite) {
-    if (!err) {
-      if (foundWebsite) {
-        var website = foundWebsite.website;
-        var visits = foundWebsite.visits;
-        var dataCollection = foundWebsite.dataCollection;
-        var uniques = countUniques(dataCollection);
-        var params = [{
-          key: key,
-          website: website,
-          visits: visits,
-          dataCollection: dataCollection
-        }, ];
-        res.render("pages/view", {
-          key: params[0].key,
-          website: params[0].website,
-          visits: params[0].visits,
-          dataCollection: params[0].dataCollection,
-          uniques: uniques,
-        });
-      } else {
-        res.send("key not in the db")
-      }
-    } else {
-      console.log(err)
-    }
-  });
+  renderView(key, req, res);
 });
 
-app.post("/register", function(req, res) {
-  const website = req.body.website;
-  Counter.findOne({
-    website: website
-  }, function(err, foundWebsite) {
-    setTimeout(function() {
-      if (foundWebsite) {
-        res.send(website + " already registered");
-      } else {
-        createTheCounter(website, res, req);
-      }
-    }, 100);
-  });
+app.get("/:key", function(req, res) {
+  const key = req.params.key;
+  renderView(key, req, res);
+});
+
+app.post("/reset", function(req, res) {
+  const key = req.body.key;
+  resetViews(key);
+  setTimeout(function() {
+    res.redirect("/" + key);
+  }, 100);
 });
 
 
@@ -215,10 +200,43 @@ const resetViews = (viewKey) => {
     }
   Counter.findOneAndUpdate(query,
   { $set: {dataCollection: [], visits: 0 }}, function(err, data) {
-    if (err) {
-      console.log(err);
+    if (!err) {
+      console.log("reset done");
     } else {
-      console.log(data);
+      console.log(err);
+    }
+  });
+};
+
+
+const renderView = (key, req, res) => {
+  Counter.findOne({
+    viewKey: key
+  }, function(err, foundWebsite) {
+    if (!err) {
+      if (foundWebsite) {
+        var website = foundWebsite.website;
+        var visits = foundWebsite.visits;
+        var dataCollection = foundWebsite.dataCollection;
+        var uniques = countUniques(dataCollection);
+        var params = [{
+          key: key,
+          website: website,
+          visits: visits,
+          dataCollection: dataCollection
+        }, ];
+        res.render("pages/view", {
+          key: params[0].key,
+          website: params[0].website,
+          visits: params[0].visits,
+          dataCollection: params[0].dataCollection,
+          uniques: uniques,
+        });
+      } else {
+        res.send("key not in the db")
+      }
+    } else {
+      console.log(err)
     }
   });
 };

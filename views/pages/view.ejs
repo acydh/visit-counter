@@ -9,7 +9,10 @@
         <li><%=('0'+ip.dateStamp.getDate()).slice(-2)%>/<%=('0'+(ip.dateStamp.getMonth()+1)).slice(-2)%>/<%=ip.dateStamp.getFullYear()%> <%=ip.dateStamp.getHours()%>.<%=('0'+ip.dateStamp.getMinutes()).slice(-2)%>.<%=('0'+ip.dateStamp.getSeconds()).slice(-2) %> - <%= ip.ip %> - <%= ip.hash %> - <%= ip.country %> - <%= ip.city %></li>
     <% }); %>
     </ul>
-
+    <form class="" action="/reset" method="post">
+      <input type="hidden" name="key" value="<%= key %>">
+      <button type="submit" class="btn" name="resetBtn">Reset</button>
+    </form>
   </div>
 
 <% include ../partials/footer %>
